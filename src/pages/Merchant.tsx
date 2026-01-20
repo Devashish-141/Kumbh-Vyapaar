@@ -16,55 +16,62 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations, TranslationKey } from "@/lib/translations";
 
-const mockProducts = [
-  {
-    id: 1,
-    name: "Tibetan Wool Shawl",
-    nameHi: "तिब्बती ऊन शॉल",
-    price: 1200,
-    sold: 45,
-    stock: 23,
-    image: "🧣",
-  },
-  {
-    id: 2,
-    name: "Silver Nose Ring",
-    nameHi: "चांदी की नथ",
-    price: 850,
-    sold: 89,
-    stock: 12,
-    image: "💍",
-  },
-  {
-    id: 3,
-    name: "Handwoven Carpet",
-    nameHi: "हाथ से बुना कालीन",
-    price: 4500,
-    sold: 12,
-    stock: 8,
-    image: "🪢",
-  },
-];
+const mockProducts: {
+  id: number;
+  translationKey: TranslationKey;
+  price: number;
+  sold: number;
+  stock: number;
+  image: string;
+}[] = [
+    {
+      id: 1,
+      translationKey: "tibetanWoolShawl",
+      price: 1200,
+      sold: 45,
+      stock: 23,
+      image: "🧣",
+    },
+    {
+      id: 2,
+      translationKey: "silverNoseRing",
+      price: 850,
+      sold: 89,
+      stock: 12,
+      image: "💍",
+    },
+    {
+      id: 3,
+      translationKey: "handwovenCarpet",
+      price: 4500,
+      sold: 12,
+      stock: 8,
+      image: "🪢",
+    },
+  ];
 
 const MerchantPage = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const { selectedLanguage, setSelectedLanguage } = useLanguage();
   const [activeSection, setActiveSection] = useState<"dashboard" | "products" | "invoices" | "settings">("dashboard");
   const [isRecording, setIsRecording] = useState(false);
   const navigate = useNavigate();
+  const t = translations[selectedLanguage as keyof typeof translations] || translations.en;
 
   const stats = [
-    { label: "Today's Sales", value: "₹12,450", icon: IndianRupee, change: "+12%" },
-    { label: "Total Orders", value: "34", icon: Package, change: "+8%" },
-    { label: "New Customers", value: "12", icon: Users, change: "+25%" },
-    { label: "Conversion Rate", value: "3.2%", icon: TrendingUp, change: "+5%" },
+    { label: t.todaysSales, value: "₹12,450", icon: IndianRupee, change: "+12%" },
+    { label: t.totalOrders, value: "34", icon: Package, change: "+8%" },
+    { label: t.newCustomers, value: "12", icon: Users, change: "+25%" },
+    { label: t.conversionRate, value: "3.2%", icon: TrendingUp, change: "+5%" },
   ];
 
   const menuItems = [
-    { id: "dashboard" as const, label: "Dashboard", icon: BarChart3 },
-    { id: "products" as const, label: "Products", icon: Package },
-    { id: "invoices" as const, label: "Invoices", icon: FileText },
-    { id: "settings" as const, label: "Settings", icon: Settings },
+    { id: "dashboard" as const, label: t.dashboard, icon: BarChart3 },
+    { id: "products" as const, label: t.products, icon: Package },
+    { id: "invoices" as const, label: t.invoices, icon: FileText },
+    { id: "settings" as const, label: t.settings, icon: Settings },
   ];
 
   return (
@@ -85,12 +92,12 @@ const MerchantPage = () => {
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">Back to Home</span>
+            <span className="text-sm">{t.backToHome}</span>
           </motion.button>
 
           <div className="mb-8">
-            <h2 className="font-display text-xl font-bold text-foreground">Merchant Hub</h2>
-            <p className="text-sm text-muted-foreground">Manage your business</p>
+            <h2 className="font-display text-xl font-bold text-foreground">{t.merchantHub}</h2>
+            <p className="text-sm text-muted-foreground">{t.manageYourBusiness}</p>
           </div>
 
           <nav className="space-y-2">
@@ -102,11 +109,10 @@ const MerchantPage = () => {
                   key={item.id}
                   whileHover={{ x: 4 }}
                   onClick={() => setActiveSection(item.id)}
-                  className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg font-medium text-sm transition-all ${
-                    isActive
-                      ? "gradient-teal text-secondary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
+                  className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg font-medium text-sm transition-all ${isActive
+                    ? "gradient-teal text-secondary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   {item.label}
@@ -125,9 +131,9 @@ const MerchantPage = () => {
               className="flex items-center gap-2 text-muted-foreground mb-4"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm">Back</span>
+              <span className="text-sm">{t.back}</span>
             </button>
-            <h1 className="font-display text-2xl font-bold text-foreground">Merchant Hub</h1>
+            <h1 className="font-display text-2xl font-bold text-foreground">{t.merchantHub}</h1>
           </div>
 
           {activeSection === "dashboard" && (
@@ -172,23 +178,22 @@ const MerchantPage = () => {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-display text-lg font-semibold mb-2">
-                      AI Product Assistant
+                      {t.aiProductAssistant}
                     </h3>
                     <p className="text-secondary-foreground/80 text-sm mb-4">
-                      Speak in Marathi or Hindi to create multilingual product listings instantly
+                      {t.aiAssistantDesc}
                     </p>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setIsRecording(!isRecording)}
-                      className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition-all ${
-                        isRecording
-                          ? "bg-red-500 text-white animate-pulse"
-                          : "bg-secondary-foreground text-secondary"
-                      }`}
+                      className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition-all ${isRecording
+                        ? "bg-red-500 text-white animate-pulse"
+                        : "bg-secondary-foreground text-secondary"
+                        }`}
                     >
                       <Mic className="w-4 h-4" />
-                      {isRecording ? "Recording..." : "Start Speaking"}
+                      {isRecording ? t.recording : t.startSpeaking}
                     </motion.button>
                   </div>
                 </div>
@@ -198,11 +203,11 @@ const MerchantPage = () => {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-display text-xl font-semibold text-foreground">
-                    Your Products
+                    {t.yourProducts}
                   </h2>
                   <Button variant="outline" size="sm" className="gap-2">
                     <Plus className="w-4 h-4" />
-                    Add New
+                    {t.addNew}
                   </Button>
                 </div>
 
@@ -219,13 +224,15 @@ const MerchantPage = () => {
                         {product.image}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-foreground truncate">{product.name}</h3>
-                        <p className="text-sm text-muted-foreground">{product.nameHi}</p>
+                        <h3 className="font-medium text-foreground truncate">{t[product.translationKey]}</h3>
+                        {selectedLanguage !== 'en' && (
+                          <p className="text-sm text-muted-foreground">{translations.en[product.translationKey]}</p>
+                        )}
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-foreground">₹{product.price}</p>
                         <p className="text-xs text-muted-foreground">
-                          {product.sold} sold • {product.stock} in stock
+                          {product.sold} {t.sold} • {product.stock} {t.inStock}
                         </p>
                       </div>
                     </motion.div>
@@ -245,10 +252,14 @@ const MerchantPage = () => {
               {activeSection === "invoices" && <FileText className="w-16 h-16 text-muted-foreground mb-4" />}
               {activeSection === "settings" && <Settings className="w-16 h-16 text-muted-foreground mb-4" />}
               <h2 className="font-display text-2xl font-semibold text-foreground mb-2 capitalize">
-                {activeSection}
+                {activeSection === "products" && t.products}
+                {activeSection === "invoices" && t.invoices}
+                {activeSection === "settings" && t.settings}
               </h2>
               <p className="text-muted-foreground text-center max-w-md">
-                This section is coming soon. Manage your {activeSection} with AI-powered tools.
+                {t.comingSoon} {activeSection === "products" && t.products.toLowerCase()}
+                {activeSection === "invoices" && t.invoices.toLowerCase()}
+                {activeSection === "settings" && t.settings.toLowerCase()} {t.withAI}
               </p>
             </motion.div>
           )}
@@ -265,9 +276,8 @@ const MerchantPage = () => {
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
-                className={`flex flex-col items-center gap-1 px-4 py-1 transition-colors ${
-                  isActive ? "text-secondary" : "text-muted-foreground"
-                }`}
+                className={`flex flex-col items-center gap-1 px-4 py-1 transition-colors ${isActive ? "text-secondary" : "text-muted-foreground"
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-xs font-medium">{item.label}</span>

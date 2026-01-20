@@ -1,89 +1,210 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Utensils, Car, Store, ArrowLeft } from "lucide-react";
+import { MapPin, Utensils, Car, Store, ArrowLeft, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { HeritageCard } from "@/components/HeritageCard";
 import { FoodSpotCard } from "@/components/FoodSpotCard";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 
 import panchavatiImg from "@/assets/panchavati.jpg";
 import trimbakeshwarImg from "@/assets/trimbakeshwar.jpg";
 import ramkundImg from "@/assets/ramkund.jpg";
+import kalaramImg from "@/assets/kalaram.png";
+import saptashrungiImg from "@/assets/saptashrungi.png";
+import muktidhamImg from "@/assets/muktidham.png";
 import misalImg from "@/assets/misal.jpg";
 import sabudanaImg from "@/assets/sabudana.jpg";
 import thukpaImg from "@/assets/thukpa.jpg";
-
-const heritageSpots = [
-  {
-    image: panchavatiImg,
-    title: "Panchavati",
-    location: "Old Nashik",
-    duration: "2-3 hours",
-    rating: 4.8,
-    description: "Sacred grove where Lord Rama spent his exile. Home to the iconic Sita Gumpha cave and ancient temples.",
-  },
-  {
-    image: trimbakeshwarImg,
-    title: "Trimbakeshwar Temple",
-    location: "30 km from Nashik",
-    duration: "Half day",
-    rating: 4.9,
-    description: "One of the twelve Jyotirlingas, this ancient Shiva temple is a major pilgrimage destination.",
-  },
-  {
-    image: ramkundImg,
-    title: "Ram Kund",
-    location: "Panchavati Area",
-    duration: "1-2 hours",
-    rating: 4.7,
-    description: "Sacred bathing tank where devotees perform rituals. Believed to be where Lord Rama bathed.",
-  },
-];
-
-const foodSpots = [
-  {
-    name: "Ambika Misal",
-    specialty: "Nashik Style Misal",
-    location: "Main Road, Panchavati",
-    timing: "7:00 AM - 11:00 PM",
-    priceRange: "₹60-100",
-    image: misalImg,
-  },
-  {
-    name: "Sadhana Restaurant",
-    specialty: "Sabudana Khichdi",
-    location: "College Road",
-    timing: "8:00 AM - 10:00 PM",
-    priceRange: "₹40-80",
-    image: sabudanaImg,
-  },
-  {
-    name: "Tibetan Kitchen",
-    specialty: "Thukpa & Momos",
-    location: "Tibetan Market Area",
-    timing: "10:00 AM - 9:00 PM",
-    priceRange: "₹80-150",
-    image: thukpaImg,
-  },
-];
-
-const parkingSpots = [
-  { name: "Godavari Ghat Parking", type: "Government", capacity: 200, status: "available", occupancy: 45 },
-  { name: "Panchavati Main Parking", type: "Government", capacity: 150, status: "moderate", occupancy: 72 },
-  { name: "Ram Kund Private Lot", type: "Private", capacity: 80, status: "full", occupancy: 95 },
-  { name: "Temple Road Parking", type: "Government", capacity: 120, status: "available", occupancy: 30 },
-];
+import sadhanaImg from "@/assets/sadhana_misal.png";
+import alArabianImg from "@/assets/al_arabian.png";
+import sayantaraImg from "@/assets/sayantara.png";
+import vijusImg from "@/assets/vijus_dabeli.png";
+import kondajiImg from "@/assets/kondaji_chivda.png";
+import ambikaImg from "@/assets/ambika_misal.png";
+import pandavLeniImg from "@/assets/pandav_leni.png";
+import phalkeSmarakImg from "@/assets/phalke_smarak.png";
+import sulaVineyardsImg from "@/assets/sula_vineyards.png";
+import someshwarImg from "@/assets/someshwar_waterfall.png";
+import artilleryMuseumImg from "@/assets/artillery_museum.png";
+import coinMuseumImg from "@/assets/coin_museum.png";
 
 const VisitorPage = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
-  const [activeTab, setActiveTab] = useState<"heritage" | "food" | "parking" | "market">("heritage");
+  const { selectedLanguage, setSelectedLanguage } = useLanguage();
+  const [activeTab, setActiveTab] = useState<"heritage" | "food" | "parking" | "market" | "places">("heritage");
   const navigate = useNavigate();
+  const t = translations[selectedLanguage as keyof typeof translations] || translations.en;
+
+  const openDirections = (location: string) => {
+    const encodedLocation = encodeURIComponent(location);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedLocation}`, '_blank');
+  };
+
+  const heritageSpots = [
+    {
+      image: trimbakeshwarImg,
+      title: t.trimbakeshwar,
+      location: t.trimbakeshwarLocation,
+      duration: t.trimbakeshwarDuration,
+      rating: 4.9,
+      description: t.trimbakeshwarDesc,
+    },
+    {
+      image: kalaramImg,
+      title: t.kalaram,
+      location: t.kalaramLocation,
+      duration: t.kalaramDuration,
+      rating: 4.8,
+      description: t.kalaramDesc,
+    },
+    {
+      image: ramkundImg,
+      title: t.ramKund,
+      location: t.ramKundLocation,
+      duration: t.ramKundDuration,
+      rating: 4.7,
+      description: t.ramKundDesc,
+    },
+    {
+      image: saptashrungiImg,
+      title: t.saptashrungi,
+      location: t.saptashrungiLocation,
+      duration: t.saptashrungiDuration,
+      rating: 4.9,
+      description: t.saptashrungiDesc,
+    },
+    {
+      image: muktidhamImg,
+      title: t.muktidham,
+      location: t.muktidhamLocation,
+      duration: t.muktidhamDuration,
+      rating: 4.6,
+      description: t.muktidhamDesc,
+    },
+  ];
+
+  const foodSpots = [
+    {
+      name: t.sadhanaName,
+      specialty: t.sadhanaSpecialty,
+      location: t.sadhanaLocation,
+      timing: t.sadhanaTiming,
+      priceRange: "₹200-300",
+      image: sadhanaImg,
+      description: t.sadhanaDesc,
+    },
+    {
+      name: t.alArabianName,
+      specialty: t.alArabianSpecialty,
+      location: t.alArabianLocation,
+      timing: t.alArabianTiming,
+      priceRange: "₹800-1000",
+      image: alArabianImg,
+      description: t.alArabianDesc,
+    },
+    {
+      name: t.sayantaraName,
+      specialty: t.sayantaraSpecialty,
+      location: t.sayantaraLocation,
+      timing: t.sayantaraTiming,
+      priceRange: "₹150-200",
+      image: sayantaraImg,
+      description: t.sayantaraDesc,
+    },
+    {
+      name: t.vijusName,
+      specialty: t.vijusSpecialty,
+      location: t.vijusLocation,
+      timing: t.vijusTiming,
+      priceRange: "₹200-300",
+      image: vijusImg,
+      description: t.vijusDesc,
+    },
+    {
+      name: t.kondajiName,
+      specialty: t.kondajiSpecialty,
+      location: t.kondajiLocation,
+      timing: t.kondajiTiming,
+      priceRange: "₹150-300",
+      image: kondajiImg,
+      description: t.kondajiDesc,
+    },
+    {
+      name: t.ambikaName,
+      specialty: t.ambikaSpecialty,
+      location: t.ambikaLocation,
+      timing: t.ambikaTiming,
+      priceRange: "₹200-300",
+      image: ambikaImg,
+      description: t.ambikaDesc,
+    },
+  ];
+
+  const parkingSpots = [
+    { name: t.godavariParking, type: t.government, capacity: 200, status: "available", occupancy: 45 },
+    { name: t.panchavatiParking, type: t.government, capacity: 150, status: "moderate", occupancy: 72 },
+    { name: t.ramKundParking, type: t.private, capacity: 80, status: "full", occupancy: 95 },
+    { name: t.templeParking, type: t.government, capacity: 120, status: "available", occupancy: 30 },
+  ];
+
+  const famousPlaces = [
+    {
+      image: pandavLeniImg,
+      title: t.pandavLeni,
+      location: t.pandavLeniLocation,
+      duration: t.pandavLeniDuration,
+      rating: 4.7,
+      description: t.pandavLeniDesc,
+    },
+    {
+      image: phalkeSmarakImg,
+      title: t.phalkeSmarak,
+      location: t.phalkeSmarakLocation,
+      duration: t.phalkeSmarakDuration,
+      rating: 4.6,
+      description: t.phalkeSmarakDesc,
+    },
+    {
+      image: sulaVineyardsImg,
+      title: t.sulaVineyards,
+      location: t.sulaVineyardsLocation,
+      duration: t.sulaVineyardsDuration,
+      rating: 4.8,
+      description: t.sulaVineyardsDesc,
+    },
+    {
+      image: someshwarImg,
+      title: t.someshwar,
+      location: t.someshwarLocation,
+      duration: t.someshwarDuration,
+      rating: 4.5,
+      description: t.someshwarDesc,
+    },
+    {
+      image: artilleryMuseumImg,
+      title: t.artilleryMuseum,
+      location: t.artilleryMuseumLocation,
+      duration: t.artilleryMuseumDuration,
+      rating: 4.6,
+      description: t.artilleryMuseumDesc,
+    },
+    {
+      image: coinMuseumImg,
+      title: t.coinMuseum,
+      location: t.coinMuseumLocation,
+      duration: t.coinMuseumDuration,
+      rating: 4.4,
+      description: t.coinMuseumDesc,
+    },
+  ];
 
   const tabs = [
-    { id: "heritage" as const, label: "Heritage", icon: MapPin },
-    { id: "food" as const, label: "Food Trail", icon: Utensils },
-    { id: "parking" as const, label: "Parking", icon: Car },
-    { id: "market" as const, label: "Marketplace", icon: Store },
+    { id: "heritage" as const, label: t.heritage, icon: MapPin },
+    { id: "places" as const, label: t.places, icon: Camera },
+    { id: "food" as const, label: t.foodTrail, icon: Utensils },
+    { id: "parking" as const, label: t.parking, icon: Car },
+    { id: "market" as const, label: t.marketplace, icon: Store },
   ];
 
   return (
@@ -104,7 +225,7 @@ const VisitorPage = () => {
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">Back to Home</span>
+            <span className="text-sm">{t.backToHome}</span>
           </motion.button>
 
           <motion.div
@@ -113,10 +234,10 @@ const VisitorPage = () => {
             transition={{ delay: 0.1 }}
           >
             <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">
-              Pilgrim Guide
+              {t.pilgrimGuide}
             </h1>
             <p className="text-muted-foreground">
-              Explore Nashik's sacred heritage, find parking, and discover local flavors
+              {t.pilgrimSubtitle}
             </p>
           </motion.div>
         </div>
@@ -135,11 +256,10 @@ const VisitorPage = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm whitespace-nowrap transition-all ${
-                    isActive
-                      ? "gradient-saffron text-primary-foreground shadow-glow-saffron"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
-                  }`}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm whitespace-nowrap transition-all ${isActive
+                    ? "gradient-saffron text-primary-foreground shadow-glow-saffron"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   {tab.label}
@@ -161,13 +281,44 @@ const VisitorPage = () => {
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-display text-2xl font-semibold text-foreground">
-                Sacred Sites
+                {t.sacredSites}
               </h2>
-              <span className="text-sm text-muted-foreground">{heritageSpots.length} places</span>
+              <span className="text-sm text-muted-foreground">{heritageSpots.length} {t.places}</span>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {heritageSpots.map((spot, index) => (
-                <HeritageCard key={spot.title} {...spot} index={index} />
+                <HeritageCard
+                  key={spot.title}
+                  {...spot}
+                  index={index}
+                  onDirectionClick={() => openDirections(`${spot.title} ${spot.location}`)}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === "places" && (
+          <motion.div
+            key="places"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-2xl font-semibold text-foreground">
+                {t.places}
+              </h2>
+              <span className="text-sm text-muted-foreground">{famousPlaces.length} {t.places}</span>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {famousPlaces.map((spot, index) => (
+                <HeritageCard
+                  key={spot.title}
+                  {...spot}
+                  index={index}
+                  onDirectionClick={() => openDirections(`${spot.title} ${spot.location}`)}
+                />
               ))}
             </div>
           </motion.div>
@@ -182,13 +333,18 @@ const VisitorPage = () => {
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-display text-2xl font-semibold text-foreground">
-                Foodie Trail
+                {t.foodieTrail}
               </h2>
-              <span className="text-sm text-muted-foreground">{foodSpots.length} spots</span>
+              <span className="text-sm text-muted-foreground">{foodSpots.length} {t.spots}</span>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               {foodSpots.map((spot, index) => (
-                <FoodSpotCard key={spot.name} {...spot} index={index} />
+                <FoodSpotCard
+                  key={spot.name}
+                  {...spot}
+                  index={index}
+                  onDirectionClick={() => openDirections(`${spot.name} ${spot.location}`)}
+                />
               ))}
             </div>
           </motion.div>
@@ -203,20 +359,20 @@ const VisitorPage = () => {
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-display text-2xl font-semibold text-foreground">
-                Smart Parking
+                {t.smartParking}
               </h2>
               <div className="flex items-center gap-4 text-sm">
                 <span className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-success" />
-                  Available
+                  {t.available}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-warning" />
-                  Moderate
+                  {t.moderate}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-danger" />
-                  Full
+                  {t.full}
                 </span>
               </div>
             </div>
@@ -232,24 +388,32 @@ const VisitorPage = () => {
                 >
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-4 h-4 rounded-full ${
-                        spot.status === "available"
-                          ? "bg-success"
-                          : spot.status === "moderate"
+                      className={`w-4 h-4 rounded-full ${spot.status === "available"
+                        ? "bg-success"
+                        : spot.status === "moderate"
                           ? "bg-warning"
                           : "bg-danger"
-                      }`}
+                        }`}
                     />
                     <div>
                       <h3 className="font-medium text-foreground">{spot.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {spot.type} • {spot.capacity} spots
+                        {spot.type} • {spot.capacity} {t.spotsLabel}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold text-foreground">{spot.occupancy}%</p>
-                    <p className="text-xs text-muted-foreground">Occupied</p>
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="text-right">
+                      <p className="text-lg font-semibold text-foreground">{spot.occupancy}%</p>
+                      <p className="text-xs text-muted-foreground">{t.occupied}</p>
+                    </div>
+                    <button
+                      onClick={() => openDirections(spot.name)}
+                      className="text-xs font-medium text-primary hover:text-primary/80 flex items-center gap-1"
+                    >
+                      <MapPin className="w-3 h-3" />
+                      Map
+                    </button>
                   </div>
                 </motion.div>
               ))}
@@ -266,10 +430,10 @@ const VisitorPage = () => {
           >
             <Store className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h2 className="font-display text-2xl font-semibold text-foreground mb-2">
-              Marketplace Coming Soon
+              {t.marketplaceSoon}
             </h2>
             <p className="text-muted-foreground max-w-md mx-auto">
-              Browse products from local vendors including the famous Tibetan Market and Saraf Bazaar jewelry shops.
+              {t.marketplaceDesc}
             </p>
           </motion.div>
         )}
@@ -285,9 +449,8 @@ const VisitorPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center gap-1 px-4 py-1 transition-colors ${
-                  isActive ? "text-primary" : "text-muted-foreground"
-                }`}
+                className={`flex flex-col items-center gap-1 px-4 py-1 transition-colors ${isActive ? "text-primary" : "text-muted-foreground"
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-xs font-medium">{tab.label}</span>

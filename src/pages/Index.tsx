@@ -1,58 +1,16 @@
-import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Compass, Store, Sparkles, Users, MapPin, Languages } from "lucide-react";
 import { Header } from "@/components/Header";
 import { RoleCard } from "@/components/RoleCard";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 import heroImage from "@/assets/hero-ghat.jpg";
 
-const translations: Record<string, { hero: string; subtitle: string; visitor: string; merchant: string; visitorDesc: string; merchantDesc: string; features: string[]; powered: string }> = {
-  en: {
-    hero: "Discover Nashik",
-    subtitle: "Your AI-powered guide to sacred heritage, vibrant markets, and authentic experiences",
-    visitor: "I'm a Visitor",
-    merchant: "I'm a Business Owner",
-    visitorDesc: "Explore temples, find parking, discover food trails, and shop local - all in your language",
-    merchantDesc: "List your products, reach pilgrims nationwide, and grow your business with AI-powered tools",
-    features: ["22+ Languages", "50,000+ Visitors Daily", "500+ Local Vendors", "AI-Powered"],
-    powered: "Powered by AI Translation",
-  },
-  hi: {
-    hero: "नाशिक की खोज करें",
-    subtitle: "पवित्र विरासत, जीवंत बाज़ारों और प्रामाणिक अनुभवों के लिए आपका AI-संचालित मार्गदर्शक",
-    visitor: "मैं एक आगंतुक हूं",
-    merchant: "मैं एक व्यापारी हूं",
-    visitorDesc: "मंदिर देखें, पार्किंग खोजें, फूड ट्रेल खोजें, और स्थानीय खरीदारी करें - अपनी भाषा में",
-    merchantDesc: "अपने उत्पाद सूचीबद्ध करें, देशभर के तीर्थयात्रियों तक पहुंचें, AI-संचालित टूल्स से अपना व्यापार बढ़ाएं",
-    features: ["22+ भाषाएं", "50,000+ दैनिक आगंतुक", "500+ स्थानीय विक्रेता", "AI-संचालित"],
-    powered: "AI अनुवाद द्वारा संचालित",
-  },
-  mr: {
-    hero: "नाशिक शोधा",
-    subtitle: "पवित्र वारसा, दोलायमान बाजार आणि अस्सल अनुभवांसाठी तुमचा AI-संचालित मार्गदर्शक",
-    visitor: "मी एक पर्यटक आहे",
-    merchant: "मी एक व्यापारी आहे",
-    visitorDesc: "मंदिरे पहा, पार्किंग शोधा, खाद्य मार्ग शोधा, आणि स्थानिक खरेदी करा - तुमच्या भाषेत",
-    merchantDesc: "तुमची उत्पादने सूचीबद्ध करा, देशभरातील यात्रेकरूंपर्यंत पोहोचा, AI-संचालित साधनांसह तुमचा व्यवसाय वाढवा",
-    features: ["22+ भाषा", "50,000+ दैनिक पर्यटक", "500+ स्थानिक विक्रेते", "AI-संचालित"],
-    powered: "AI अनुवादाद्वारे संचालित",
-  },
-  ta: {
-    hero: "நாசிக்கை கண்டறியுங்கள்",
-    subtitle: "புனித பாரம்பரியம், உயிரான சந்தைகள் மற்றும் உண்மையான அனுபவங்களுக்கான உங்கள் AI-இயக்கப்படும் வழிகாட்டி",
-    visitor: "நான் ஒரு பார்வையாளர்",
-    merchant: "நான் ஒரு வணிக உரிமையாளர்",
-    visitorDesc: "கோவில்களை ஆராயுங்கள், நிறுத்துமிடம் கண்டறியுங்கள், உணவு வழிகளை கண்டுபிடியுங்கள் - உங்கள் மொழியில்",
-    merchantDesc: "உங்கள் தயாரிப்புகளை பட்டியலிடுங்கள், தேசிய யாத்ரீகர்களை சென்றடையுங்கள், AI கருவிகளுடன் வளருங்கள்",
-    features: ["22+ மொழிகள்", "50,000+ தினசரி பார்வையாளர்கள்", "500+ உள்ளூர் விற்பனையாளர்கள்", "AI-இயக்கப்படுகிறது"],
-    powered: "AI மொழிபெயர்ப்பால் இயக்கப்படுகிறது",
-  },
-};
-
 const Index = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const { selectedLanguage, setSelectedLanguage } = useLanguage();
   const navigate = useNavigate();
-  const t = translations[selectedLanguage] || translations.en;
+  const t = translations[selectedLanguage as keyof typeof translations] || translations.en;
 
   const featureIcons = [Languages, Users, Store, Sparkles];
 
@@ -154,18 +112,20 @@ const Index = () => {
             <RoleCard
               icon={Compass}
               title={t.visitor}
-              subtitle="Pilgrim Mode"
+              subtitle={t.pilgrimMode}
               description={t.visitorDesc}
               variant="visitor"
               onClick={() => navigate("/visitor")}
+              getStartedText={t.getStarted}
             />
             <RoleCard
               icon={Store}
               title={t.merchant}
-              subtitle="Merchant Hub"
+              subtitle={t.merchantHubLabel}
               description={t.merchantDesc}
               variant="merchant"
               onClick={() => navigate("/merchant")}
+              getStartedText={t.getStarted}
             />
           </motion.div>
         </div>
@@ -187,38 +147,7 @@ const Index = () => {
         </motion.div>
       </section>
 
-      {/* Quick Stats Section */}
-      <section className="py-16 bg-sacred">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-8"
-          >
-            {[
-              { value: "22+", label: "Languages Supported" },
-              { value: "50K+", label: "Daily Visitors" },
-              { value: "500+", label: "Local Vendors" },
-              { value: "100%", label: "AI Powered" },
-            ].map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
-              >
-                <p className="text-3xl md:text-4xl font-display font-bold text-gradient-saffron mb-2">
-                  {stat.value}
-                </p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+
     </div>
   );
 };

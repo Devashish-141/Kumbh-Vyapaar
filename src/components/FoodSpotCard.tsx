@@ -9,6 +9,8 @@ interface FoodSpotCardProps {
   priceRange: string;
   image: string;
   index: number;
+  description?: string;
+  onDirectionClick?: () => void;
 }
 
 export function FoodSpotCard({
@@ -19,6 +21,8 @@ export function FoodSpotCard({
   priceRange,
   image,
   index,
+  description,
+  onDirectionClick,
 }: FoodSpotCardProps) {
   return (
     <motion.div
@@ -54,6 +58,12 @@ export function FoodSpotCard({
           <span className="text-sm text-primary font-medium">{specialty}</span>
         </div>
 
+        {description && (
+          <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+            {description}
+          </p>
+        )}
+
         <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
           <MapPin className="w-3 h-3" />
           <span className="truncate">{location}</span>
@@ -64,6 +74,7 @@ export function FoodSpotCard({
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={onDirectionClick}
             className="flex items-center gap-1 text-xs font-medium text-secondary bg-secondary/10 px-3 py-1.5 rounded-full hover:bg-secondary hover:text-secondary-foreground transition-colors"
           >
             <Navigation className="w-3 h-3" />
