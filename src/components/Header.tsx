@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { LanguagePicker } from "./LanguagePicker";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
 
@@ -19,10 +19,33 @@ export function Header({
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { selectedLanguage: lang } = useLanguage();
   const t = translations[lang as keyof typeof translations] || translations.en;
 
   const isTransparent = variant === "transparent";
+
+  const handleNavClick = (sectionId: string) => {
+    setMobileMenuOpen(false);
+
+    // If we're not on the home page, navigate to home first
+    if (location.pathname !== '/') {
+      navigate('/', { state: { scrollTo: sectionId } });
+    } else {
+      // We're on home page, scroll to section
+      const element = document.getElementById(sectionId);
+      if (element) {
+        const headerOffset = 80;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
 
   return (
     <motion.header
@@ -30,8 +53,8 @@ export function Header({
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
       className={`fixed top-0 left-0 right-0 z-50 ${isTransparent
-          ? "bg-transparent"
-          : "bg-card/80 backdrop-blur-lg border-b border-border"
+        ? "bg-transparent"
+        : "bg-card/80 backdrop-blur-lg border-b border-border"
         }`}
     >
       <div className="container mx-auto px-4">
@@ -57,46 +80,46 @@ export function Header({
 
           {/* Desktop Navigation - Translated */}
           <nav className="hidden md:flex items-center gap-8">
-            <motion.a
-              href="#heritage"
+            <motion.button
+              onClick={() => handleNavClick('heritage')}
               whileHover={{ y: -2 }}
               className={`text-sm font-medium transition-colors ${isTransparent
-                  ? "text-white/90 hover:text-white"
-                  : "text-muted-foreground hover:text-foreground"
+                ? "text-white/90 hover:text-white"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               {t.heritage}
-            </motion.a>
-            <motion.a
-              href="#marketplace"
+            </motion.button>
+            <motion.button
+              onClick={() => handleNavClick('marketplace')}
               whileHover={{ y: -2 }}
               className={`text-sm font-medium transition-colors ${isTransparent
-                  ? "text-white/90 hover:text-white"
-                  : "text-muted-foreground hover:text-foreground"
+                ? "text-white/90 hover:text-white"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               {t.marketplace}
-            </motion.a>
-            <motion.a
-              href="#parking"
+            </motion.button>
+            <motion.button
+              onClick={() => handleNavClick('parking')}
               whileHover={{ y: -2 }}
               className={`text-sm font-medium transition-colors ${isTransparent
-                  ? "text-white/90 hover:text-white"
-                  : "text-muted-foreground hover:text-foreground"
+                ? "text-white/90 hover:text-white"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               {t.parking}
-            </motion.a>
-            <motion.a
-              href="#food-trail"
+            </motion.button>
+            <motion.button
+              onClick={() => handleNavClick('food-trail')}
               whileHover={{ y: -2 }}
               className={`text-sm font-medium transition-colors ${isTransparent
-                  ? "text-white/90 hover:text-white"
-                  : "text-muted-foreground hover:text-foreground"
+                ? "text-white/90 hover:text-white"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               {t.foodTrail}
-            </motion.a>
+            </motion.button>
           </nav>
 
           {/* Right Side */}
@@ -111,8 +134,8 @@ export function Header({
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={`md:hidden p-2 rounded-lg ${isTransparent
-                  ? "text-white hover:bg-white/10"
-                  : "text-foreground hover:bg-muted"
+                ? "text-white hover:bg-white/10"
+                : "text-foreground hover:bg-muted"
                 }`}
             >
               {mobileMenuOpen ? <X /> : <Menu />}
@@ -130,34 +153,30 @@ export function Header({
           className="md:hidden bg-card/95 backdrop-blur-lg border-t border-border"
         >
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-            <a
-              href="#heritage"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors"
+            <button
+              onClick={() => handleNavClick('heritage')}
+              className="px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors text-left"
             >
               {t.heritage}
-            </a>
-            <a
-              href="#marketplace"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors"
+            </button>
+            <button
+              onClick={() => handleNavClick('marketplace')}
+              className="px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors text-left"
             >
               {t.marketplace}
-            </a>
-            <a
-              href="#parking"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors"
+            </button>
+            <button
+              onClick={() => handleNavClick('parking')}
+              className="px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors text-left"
             >
               {t.parking}
-            </a>
-            <a
-              href="#food-trail"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors"
+            </button>
+            <button
+              onClick={() => handleNavClick('food-trail')}
+              className="px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors text-left"
             >
               {t.foodTrail}
-            </a>
+            </button>
           </nav>
         </motion.div>
       )}

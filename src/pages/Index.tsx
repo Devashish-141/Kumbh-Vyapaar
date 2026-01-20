@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Compass, Store, Sparkles, Users, MapPin, Languages } from "lucide-react";
 import { Header } from "@/components/Header";
 import { RoleCard } from "@/components/RoleCard";
+import { AuthDialog } from "@/components/AuthDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
 import heroImage from "@/assets/hero-ghat.jpg";
@@ -10,9 +12,34 @@ import heroImage from "@/assets/hero-ghat.jpg";
 const Index = () => {
   const { selectedLanguage, setSelectedLanguage } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const t = translations[selectedLanguage as keyof typeof translations] || translations.en;
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   const featureIcons = [Languages, Users, Store, Sparkles];
+
+  // Handle scroll to section when navigating from other pages
+  useEffect(() => {
+    const state = location.state as { scrollTo?: string };
+    if (state?.scrollTo) {
+      setTimeout(() => {
+        const element = document.getElementById(state.scrollTo);
+        if (element) {
+          const headerOffset = 80;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+
+      // Clear the state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -124,7 +151,7 @@ const Index = () => {
               subtitle={t.merchantHubLabel}
               description={t.merchantDesc}
               variant="merchant"
-              onClick={() => navigate("/merchant")}
+              onClick={() => setIsAuthOpen(true)}
               getStartedText={t.getStarted}
             />
           </motion.div>
@@ -147,7 +174,12 @@ const Index = () => {
         </motion.div>
       </section>
 
-
+      {/* Auth Dialog */}
+      <AuthDialog
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onSuccess={() => navigate("/merchant")}
+      />
     </div>
   );
 };

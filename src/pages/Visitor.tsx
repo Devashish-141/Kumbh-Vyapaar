@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Utensils, Car, Store, ArrowLeft, Camera } from "lucide-react";
+import { MapPin, Utensils, Car, Store, ArrowLeft, Camera, Phone, Clock, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { HeritageCard } from "@/components/HeritageCard";
 import { FoodSpotCard } from "@/components/FoodSpotCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
+import { supabase } from "@/lib/supabase";
 
 import panchavatiImg from "@/assets/panchavati.jpg";
 import trimbakeshwarImg from "@/assets/trimbakeshwar.jpg";
@@ -33,8 +34,39 @@ import coinMuseumImg from "@/assets/coin_museum.png";
 const VisitorPage = () => {
   const { selectedLanguage, setSelectedLanguage } = useLanguage();
   const [activeTab, setActiveTab] = useState<"heritage" | "food" | "parking" | "market" | "places">("heritage");
+  const [stores, setStores] = useState<any[]>([]);
+  const [isLoadingStores, setIsLoadingStores] = useState(false);
   const navigate = useNavigate();
   const t = translations[selectedLanguage as keyof typeof translations] || translations.en;
+
+  useEffect(() => {
+    if (activeTab === "market") {
+      fetchStores();
+    }
+  }, [activeTab]);
+
+  const fetchStores = async () => {
+    setIsLoadingStores(true);
+    try {
+      const { data, error } = await supabase
+        .from('stores')
+        .select(`
+          *,
+          products:products(count)
+        `)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      if (data) {
+        setStores(data);
+      }
+    } catch (error) {
+      console.error('Error fetching stores:', error);
+    } finally {
+      setIsLoadingStores(false);
+    }
+  };
 
   const openDirections = (location: string) => {
     const encodedLocation = encodeURIComponent(location);
@@ -426,15 +458,130 @@ const VisitorPage = () => {
             key="market"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center py-16"
           >
-            <Store className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h2 className="font-display text-2xl font-semibold text-foreground mb-2">
-              {t.marketplaceSoon}
-            </h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              {t.marketplaceDesc}
-            </p>
+            {isLoadingStores ? (
+              <div className="text-center py-16">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading stores...</p>
+              </div>
+            ) : stores.length === 0 ? (
+              <div className="text-center py-16">
+                <Store className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h2 className="font-display text-2xl font-semibold text-foreground mb-2">
+                  No Stores Available
+                </h2>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Merchants haven't set up their stores yet. Check back soon!
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {stores.map((store, index) => (
+                  <motion.div
+                    key={store.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-card rounded-xl border border-border overflow-hidden shadow-soft hover:shadow-elevated transition-all"
+                  >
+                    {/* Store Image */}
+                    <div className="h-48 bg-muted flex items-center justify-center overflow-hidden">
+                      {store.store_image_url && store.store_image_url.startsWith('http') ? (
+                        <img
+                          src={store.store_image_url}
+                          alt={store.store_name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-6xl">{store.store_image_url || '🏪'}</span>
+                      )}
+                    </div>
+
+                    {/* Store Info */}
+                    <div className="p-4 space-y-3">
+                      <div>
+                        <h3 className="font-semibold text-lg text-foreground mb-1">
+                          {store.store_name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {store.category}
+                        </p>
+                      </div>
+
+                      {store.description && (
+                        <p className="text-sm text-foreground line-clamp-2">
+                          {store.description}
+                        </p>
+                      )}
+
+                      {/* Status Badge */}
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${store.is_open
+                          ? 'bg-success/10 text-success'
+                          : 'bg-danger/10 text-danger'
+                          }`}>
+                          {store.is_open ? '● Open' : '● Closed'}
+                        </span>
+                        {store.opening_hours && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {store.opening_hours}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Products Count */}
+                      {store.products && store.products.length > 0 && (
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Package className="w-4 h-4" />
+                          <span>{store.products[0].count || 0} products available</span>
+                        </div>
+                      )}
+
+                      {/* Contact & Location */}
+                      <div className="space-y-2 pt-2 border-t border-border">
+                        {store.phone && (
+                          <div className="flex items-center gap-2 text-sm text-foreground">
+                            <Phone className="w-4 h-4 text-muted-foreground" />
+                            <a href={`tel:${store.phone}`} className="hover:text-primary transition-colors">
+                              {store.phone}
+                            </a>
+                          </div>
+                        )}
+                        <div className="flex items-start gap-2 text-sm text-foreground">
+                          <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p>{store.address}</p>
+                            {store.landmark && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Near {store.landmark}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          onClick={() => navigate(`/store/${store.id}`)}
+                          className="flex-1 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                        >
+                          <Package className="w-4 h-4" />
+                          View Products
+                        </button>
+                        <button
+                          onClick={() => openDirections(`${store.store_name}, ${store.address}`)}
+                          className="px-4 py-2.5 rounded-lg border border-border hover:bg-muted transition-colors flex items-center justify-center gap-2"
+                        >
+                          <MapPin className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
       </main>
