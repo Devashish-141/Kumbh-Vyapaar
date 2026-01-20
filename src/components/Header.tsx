@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { LanguagePicker } from "./LanguagePicker";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
 
@@ -16,31 +16,12 @@ export function Header({
   variant = "transparent",
 }: HeaderProps) {
   const navigate = useNavigate();
-  const location = useLocation();
   const { selectedLanguage: lang } = useLanguage();
   const t = translations[lang as keyof typeof translations] || translations.en;
 
   const isTransparent = variant === "transparent";
 
-  const handleNavClick = (sectionId: string) => {
-    // If we're not on the home page, navigate to home first
-    if (location.pathname !== '/') {
-      navigate('/', { state: { scrollTo: sectionId } });
-    } else {
-      // We're on home page, scroll to section
-      const element = document.getElementById(sectionId);
-      if (element) {
-        const headerOffset = 80;
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      }
-    }
-  };
 
   return (
     <motion.header
@@ -74,48 +55,7 @@ export function Header({
           </motion.button>
 
           {/* Desktop Navigation - Translated */}
-          <nav className="hidden md:flex items-center gap-8">
-            <motion.button
-              onClick={() => handleNavClick('heritage')}
-              whileHover={{ y: -2 }}
-              className={`text-sm font-medium transition-colors ${isTransparent
-                ? "text-white/90 hover:text-white"
-                : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              {t.heritage}
-            </motion.button>
-            <motion.button
-              onClick={() => handleNavClick('marketplace')}
-              whileHover={{ y: -2 }}
-              className={`text-sm font-medium transition-colors ${isTransparent
-                ? "text-white/90 hover:text-white"
-                : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              {t.marketplace}
-            </motion.button>
-            <motion.button
-              onClick={() => handleNavClick('parking')}
-              whileHover={{ y: -2 }}
-              className={`text-sm font-medium transition-colors ${isTransparent
-                ? "text-white/90 hover:text-white"
-                : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              {t.parking}
-            </motion.button>
-            <motion.button
-              onClick={() => handleNavClick('food-trail')}
-              whileHover={{ y: -2 }}
-              className={`text-sm font-medium transition-colors ${isTransparent
-                ? "text-white/90 hover:text-white"
-                : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              {t.foodTrail}
-            </motion.button>
-          </nav>
+
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
