@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Utensils, Car, Store, ArrowLeft, Camera, Phone, Clock, Package } from "lucide-react";
+import { MapPin, Utensils, Car, Store, ArrowLeft, Camera, Phone, Clock, Package, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { HeritageCard } from "@/components/HeritageCard";
 import { FoodSpotCard } from "@/components/FoodSpotCard";
+import { StudentGuideCard } from "@/components/StudentGuideCard";
+import { GuideEnrollDialog } from "@/components/GuideEnrollDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
 import { supabase } from "@/lib/supabase";
@@ -33,9 +36,12 @@ import coinMuseumImg from "@/assets/coin_museum.png";
 
 const VisitorPage = () => {
   const { selectedLanguage, setSelectedLanguage } = useLanguage();
-  const [activeTab, setActiveTab] = useState<"heritage" | "food" | "parking" | "market" | "places">("heritage");
+  const [activeTab, setActiveTab] = useState<"heritage" | "food" | "parking" | "market" | "places" | "guides">("heritage");
   const [stores, setStores] = useState<any[]>([]);
+  const [guides, setGuides] = useState<any[]>([]);
   const [isLoadingStores, setIsLoadingStores] = useState(false);
+  const [isLoadingGuides, setIsLoadingGuides] = useState(false);
+  const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
   const navigate = useNavigate();
   const t = translations[selectedLanguage as keyof typeof translations] || translations.en;
 
@@ -43,7 +49,33 @@ const VisitorPage = () => {
     if (activeTab === "market") {
       fetchStores();
     }
+    if (activeTab === "guides") {
+      fetchGuides();
+    }
   }, [activeTab]);
+
+  const fetchGuides = async () => {
+    setIsLoadingGuides(true);
+    try {
+      const { data, error } = await supabase
+        .from('student_guides')
+        .select('*')
+        .eq('is_verified', true);
+
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setGuides(data);
+      } else {
+        // Fallback to initial mock data if DB is empty
+        setGuides(initialGuides);
+      }
+    } catch (error) {
+      console.error('Error fetching guides:', error);
+      setGuides(initialGuides);
+    } finally {
+      setIsLoadingGuides(false);
+    }
+  };
 
   const fetchStores = async () => {
     setIsLoadingStores(true);
@@ -231,10 +263,44 @@ const VisitorPage = () => {
     },
   ];
 
+  const initialGuides = [
+    {
+      name: "Rahul Deshmukh",
+      college: "KTHM College",
+      age: 21,
+      languages: ["English", "Hindi", "Marathi"],
+      specialization: "History & Architecture of ancient Nashik temples",
+      dailyRate: "500",
+      studentId: "N-2024-042",
+      verified: true
+    },
+    {
+      name: "Priyanka Patil",
+      college: "RYK College of Science",
+      age: 20,
+      languages: ["English", "Hindi", "Marathi", "Gujarati"],
+      specialization: "Godavari Ghat traditions and cultural heritage",
+      dailyRate: "600",
+      studentId: "N-2024-115",
+      verified: true
+    },
+    {
+      name: "Aniket Shinde",
+      college: "Sandip Foundation",
+      age: 22,
+      languages: ["English", "Hindi", "Marathi", "Tamil"],
+      specialization: "Panchavati food trails and local market history",
+      dailyRate: "450",
+      studentId: "N-2024-089",
+      verified: true
+    }
+  ];
+
   const tabs = [
     { id: "heritage" as const, label: t.heritage, icon: MapPin },
     { id: "places" as const, label: t.places, icon: Camera },
     { id: "food" as const, label: t.foodTrail, icon: Utensils },
+    { id: "guides" as const, label: t.studentGuides, icon: Users },
     { id: "parking" as const, label: t.parking, icon: Car },
     { id: "market" as const, label: t.marketplace, icon: Store },
   ];
@@ -376,6 +442,54 @@ const VisitorPage = () => {
                   {...spot}
                   index={index}
                   onDirectionClick={() => openDirections(`${spot.name} ${spot.location}`)}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === "guides" && (
+          <motion.div
+            key="guides"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 className="font-display text-2xl font-semibold text-foreground">
+                  {t.hireGuide}
+                </h2>
+                <p className="text-muted-foreground text-sm mt-1">
+                  {t.guideDesc}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={() => setIsEnrollDialogOpen(true)}
+                  variant="outline"
+                  className="border-saffron text-saffron hover:bg-saffron/5 font-semibold"
+                >
+                  Apply as Guide
+                </Button>
+                <span className="text-sm bg-muted px-4 py-2 rounded-full text-muted-foreground">
+                  {guides.length} {t.studentGuides}
+                </span>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {guides.map((guide) => (
+                <StudentGuideCard
+                  key={guide.studentId || guide.id}
+                  name={guide.full_name || guide.name}
+                  college={guide.college_name || guide.college}
+                  age={guide.age}
+                  languages={guide.languages_spoken || guide.languages}
+                  specialization={Array.isArray(guide.specialization) ? guide.specialization[0] : guide.specialization}
+                  dailyRate={guide.daily_rate?.toString() || guide.dailyRate}
+                  studentId={guide.student_id || guide.studentId}
+                  verified={guide.is_verified ?? guide.verified}
+                  t={t}
                 />
               ))}
             </div>
@@ -606,6 +720,14 @@ const VisitorPage = () => {
           })}
         </div>
       </nav>
+      <GuideEnrollDialog
+        isOpen={isEnrollDialogOpen}
+        onClose={() => {
+          setIsEnrollDialogOpen(false);
+          fetchGuides();
+        }}
+        t={t}
+      />
     </div>
   );
 };
