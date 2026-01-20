@@ -123,13 +123,13 @@ export function StudentGuideCard({
                         </div>
                         <div className="flex gap-2">
                             <Button
-                                onClick={() => handleCall(studentId.includes('42') ? "9876543210" : "9123456789")}
+                                onClick={() => handleCall(phone)}
                                 size="icon" variant="outline" className="rounded-full w-10 h-10 border-saffron/20 hover:bg-saffron/5 text-saffron"
                             >
                                 <Phone className="w-4 h-4" />
                             </Button>
                             <Button
-                                onClick={() => handleWhatsApp(studentId.includes('42') ? "9876543210" : "9123456789")}
+                                onClick={() => handleWhatsApp(phone)}
                                 size="icon" variant="outline" className="rounded-full w-10 h-10 border-green-500/20 hover:bg-green-500/5 text-green-600"
                             >
                                 <MessageSquare className="w-4 h-4" />

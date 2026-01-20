@@ -65,7 +65,7 @@
     --gradient-teal: linear-gradient(135deg, hsl(180 75% 22%), hsl(178 55% 35%));
     --gradient-sacred: linear-gradient(180deg, hsl(40 30% 95%), hsl(30 20% 98%));
     --gradient-sunset: linear-gradient(135deg, hsl(20 95% 55%), hsl(43 85% 55%));
-    --gradient-hero: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.6) 100%);
+    --gradient-hero: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.6) 100%);
 
     /* Shadows */
     --shadow-soft: 0 4px 20px -4px hsl(220 25% 10% / 0.08);
@@ -133,7 +133,12 @@
     font-feature-settings: "kern" 1, "liga" 1;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display;
   }
 }
@@ -192,8 +197,15 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
   }
 
   .animate-shimmer {
@@ -201,7 +213,25 @@
   }
 
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+      background-position: -200% 0;
+    }
+
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }

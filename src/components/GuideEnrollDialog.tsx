@@ -285,11 +285,11 @@ export function GuideEnrollDialog({ isOpen, onClose, t }: GuideEnrollDialogProps
                             />
                         </div>
 
-                        <DialogFooter className="pt-4">
-                            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+                        <DialogFooter className="pt-4 flex-col gap-3 sm:flex-row sm:gap-0">
+                            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting} className="w-full sm:w-auto mt-2 sm:mt-0">
                                 Cancel
                             </Button>
-                            <Button type="submit" className="gradient-saffron text-white min-w-[120px]" disabled={isSubmitting}>
+                            <Button type="submit" className="gradient-saffron text-white min-w-[120px] w-full sm:w-auto" disabled={isSubmitting}>
                                 {isSubmitting ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

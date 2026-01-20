@@ -702,7 +702,7 @@ const VisitorPage = () => {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border z-50">
-        <div className="flex justify-around py-3">
+        <div className="flex overflow-x-auto items-center py-2 px-2 no-scrollbar gap-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -710,11 +710,11 @@ const VisitorPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center gap-1 px-4 py-1 transition-colors ${isActive ? "text-primary" : "text-muted-foreground"
+                className={`flex flex-col items-center gap-1 min-w-[70px] px-2 py-1 rounded-lg transition-all ${isActive ? "text-primary bg-primary/10" : "text-muted-foreground"
                   }`}
               >
-                <Icon className="w-5 h-5" />
-                <span className="text-xs font-medium">{tab.label}</span>
+                <Icon className={`w-5 h-5 ${isActive ? "scale-110" : ""}`} />
+                <span className="text-[10px] font-medium whitespace-nowrap">{tab.label}</span>
               </button>
             );
           })}
