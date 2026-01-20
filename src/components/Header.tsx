@@ -1,7 +1,5 @@
 import { motion } from "framer-motion";
 import { LanguagePicker } from "./LanguagePicker";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
@@ -17,7 +15,6 @@ export function Header({
   onLanguageChange,
   variant = "transparent",
 }: HeaderProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedLanguage: lang } = useLanguage();
@@ -26,8 +23,6 @@ export function Header({
   const isTransparent = variant === "transparent";
 
   const handleNavClick = (sectionId: string) => {
-    setMobileMenuOpen(false);
-
     // If we're not on the home page, navigate to home first
     if (location.pathname !== '/') {
       navigate('/', { state: { scrollTo: sectionId } });
@@ -129,57 +124,9 @@ export function Header({
               onLanguageChange={onLanguageChange}
               variant={isTransparent ? "dark" : "light"}
             />
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`md:hidden p-2 rounded-lg ${isTransparent
-                ? "text-white hover:bg-white/10"
-                : "text-foreground hover:bg-muted"
-                }`}
-            >
-              {mobileMenuOpen ? <X /> : <Menu />}
-            </button>
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu - Translated */}
-      {mobileMenuOpen && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          className="md:hidden bg-card/95 backdrop-blur-lg border-t border-border"
-        >
-          <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-            <button
-              onClick={() => handleNavClick('heritage')}
-              className="px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors text-left"
-            >
-              {t.heritage}
-            </button>
-            <button
-              onClick={() => handleNavClick('marketplace')}
-              className="px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors text-left"
-            >
-              {t.marketplace}
-            </button>
-            <button
-              onClick={() => handleNavClick('parking')}
-              className="px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors text-left"
-            >
-              {t.parking}
-            </button>
-            <button
-              onClick={() => handleNavClick('food-trail')}
-              className="px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors text-left"
-            >
-              {t.foodTrail}
-            </button>
-          </nav>
-        </motion.div>
-      )}
     </motion.header>
   );
 }

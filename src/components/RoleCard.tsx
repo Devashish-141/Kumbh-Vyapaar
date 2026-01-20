@@ -27,9 +27,9 @@ export function RoleCard({
       whileHover={{ scale: 1.03, y: -4 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className={`relative overflow-hidden rounded-2xl p-8 text-left transition-all w-full group ${isVisitor
-          ? "bg-card border-2 border-border hover:border-primary shadow-soft hover:shadow-glow-saffron"
-          : "bg-secondary text-secondary-foreground border-2 border-secondary hover:border-teal-light shadow-soft hover:shadow-glow-teal"
+      className={`relative overflow-hidden rounded-2xl p-6 md:p-8 text-left transition-all w-full group ${isVisitor
+        ? "bg-card border-2 border-border hover:border-primary shadow-soft hover:shadow-glow-saffron"
+        : "bg-secondary text-secondary-foreground border-2 border-secondary hover:border-teal-light shadow-soft hover:shadow-glow-teal"
         }`}
     >
       {/* Background decoration */}
@@ -43,8 +43,8 @@ export function RoleCard({
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.1 }}
         className={`inline-flex p-4 rounded-xl mb-6 ${isVisitor
-            ? "gradient-saffron text-primary-foreground"
-            : "gradient-teal text-secondary-foreground"
+          ? "gradient-saffron text-primary-foreground"
+          : "gradient-teal text-secondary-foreground"
           }`}
       >
         <Icon className="w-8 h-8" />

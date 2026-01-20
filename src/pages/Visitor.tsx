@@ -369,7 +369,7 @@ const VisitorPage = () => {
       </div>
 
       {/* Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 pb-24 md:pb-8">
         {activeTab === "heritage" && (
           <motion.div
             key="heritage"
@@ -549,10 +549,7 @@ const VisitorPage = () => {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <div className="text-right">
-                      <p className="text-lg font-semibold text-foreground">{spot.occupancy}%</p>
-                      <p className="text-xs text-muted-foreground">{t.occupied}</p>
-                    </div>
+
                     <button
                       onClick={() => openDirections(spot.name)}
                       className="text-xs font-medium text-primary hover:text-primary/80 flex items-center gap-1"

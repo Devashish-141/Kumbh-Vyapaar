@@ -50,7 +50,7 @@ const Index = () => {
       />
 
       {/* Hero Section */}
-      <section className="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-20">
         {/* Background Image */}
         <motion.div
           initial={{ scale: 1.1 }}
@@ -83,7 +83,7 @@ const Index = () => {
               <span className="text-sm font-medium text-card">{t.powered}</span>
             </motion.div>
 
-            <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-card mb-6 tracking-tight">
+            <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-card mb-6 tracking-tight">
               <AnimatePresence mode="wait">
                 <motion.span
                   key={selectedLanguage + "-hero"}
