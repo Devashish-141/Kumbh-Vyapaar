@@ -81,6 +81,7 @@ CREATE TABLE products (
     original_price DECIMAL(10, 2),
     discount_percentage INTEGER DEFAULT 0 CHECK (discount_percentage >= 0 AND discount_percentage <= 100),
     stock_quantity INTEGER DEFAULT 0 CHECK (stock_quantity >= 0),
+    stock INTEGER DEFAULT 0 CHECK (stock >= 0),
     min_order_quantity INTEGER DEFAULT 1,
     max_order_quantity INTEGER,
     category VARCHAR(100),
@@ -103,6 +104,7 @@ CREATE TABLE products (
     is_available BOOLEAN DEFAULT true,
     views_count INTEGER DEFAULT 0,
     sales_count INTEGER DEFAULT 0,
+    sold INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
