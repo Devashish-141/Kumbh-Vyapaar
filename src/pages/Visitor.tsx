@@ -212,6 +212,8 @@ const VisitorPage = () => {
     { name: t.templeParking, type: t.government, capacity: 120, status: "available", occupancy: 30 },
   ];
 
+
+
   const famousPlaces = [
     {
       image: pandavLeniImg,
@@ -503,24 +505,10 @@ const VisitorPage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <div className="flex items-center justify-between mb-6">
+            <div className="mb-6">
               <h2 className="font-display text-2xl font-semibold text-foreground">
                 {t.smartParking}
               </h2>
-              <div className="flex items-center gap-4 text-sm">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-success" />
-                  {t.available}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-warning" />
-                  {t.moderate}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-danger" />
-                  {t.full}
-                </span>
-              </div>
             </div>
 
             <div className="grid gap-4">
@@ -549,13 +537,12 @@ const VisitorPage = () => {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-
                     <button
                       onClick={() => openDirections(spot.name)}
                       className="text-xs font-medium text-primary hover:text-primary/80 flex items-center gap-1"
                     >
                       <MapPin className="w-3 h-3" />
-                      Map
+                      Directions
                     </button>
                   </div>
                 </motion.div>

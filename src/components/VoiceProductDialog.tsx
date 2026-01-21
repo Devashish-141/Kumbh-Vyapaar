@@ -23,6 +23,8 @@ export const VoiceProductDialog = ({ isOpen, onClose, onProductAdded }: VoicePro
     const [success, setSuccess] = useState(false);
     const [extractedData, setExtractedData] = useState<any>(null);
     const [stage, setStage] = useState<"listening" | "processing" | "confirm" | "success">("listening");
+    const [currentField, setCurrentField] = useState<string | null>(null);
+    const [filledFields, setFilledFields] = useState<string[]>([]);
 
     const recognitionRef = useRef<any>(null);
     const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -101,18 +103,73 @@ export const VoiceProductDialog = ({ isOpen, onClose, onProductAdded }: VoicePro
     const processTranscript = async () => {
         setStage("processing");
         setIsProcessing(true);
+        setFilledFields([]);
 
         // Simple keyword extraction (in production, you'd use a proper NLP service)
         const text = transcript.toLowerCase();
 
         // Extract product details using basic pattern matching
         const extractedInfo: any = {
+            serialNumber: "",
             name: "",
             price: 0,
-            description: transcript,
             stock: 0,
             category: "",
+            description: transcript,
         };
+
+        // Helper function to announce and highlight field
+        const announceField = (fieldName: string, value: any, delay: number) => {
+            return new Promise<void>((resolve) => {
+                setTimeout(() => {
+                    setCurrentField(fieldName);
+                    const announcement = getFieldAnnouncement(fieldName, value);
+                    speak(announcement);
+
+                    setTimeout(() => {
+                        setFilledFields(prev => [...prev, fieldName]);
+                        setCurrentField(null);
+                        resolve();
+                    }, 1500);
+                }, delay);
+            });
+        };
+
+        const getFieldAnnouncement = (field: string, value: any): string => {
+            const announcements: Record<string, string> = {
+                serialNumber: selectedLanguage === 'hi'
+                    ? `सीरियल नंबर भर रहा हूं: ${value}`
+                    : `Filling serial number: ${value}`,
+                name: selectedLanguage === 'hi'
+                    ? `उत्पाद का नाम भर रहा हूं: ${value}`
+                    : `Filling product name: ${value}`,
+                price: selectedLanguage === 'hi'
+                    ? `कीमत भर रहा हूं: ${value} रुपये`
+                    : `Filling price: ${value} rupees`,
+                stock: selectedLanguage === 'hi'
+                    ? `स्टॉक भर रहा हूं: ${value} यूनिट`
+                    : `Filling stock: ${value} units`,
+                category: selectedLanguage === 'hi'
+                    ? `श्रेणी भर रहा हूं: ${value}`
+                    : `Filling category: ${value}`,
+                description: selectedLanguage === 'hi'
+                    ? `विवरण भर रहा हूं`
+                    : `Filling description`,
+            };
+            return announcements[field] || `Filling ${field}: ${value}`;
+        };
+
+        // Extract serial number (looking for SKU, serial, or code patterns)
+        const serialMatch = text.match(/(?:sku|serial|code)[\s:-]*([a-z0-9-]+)/i);
+        if (serialMatch) {
+            extractedInfo.serialNumber = serialMatch[1].toUpperCase();
+        }
+
+        // Extract name (first few words or sentence)
+        const sentences = transcript.split(/[.!?]/);
+        if (sentences.length > 0) {
+            extractedInfo.name = sentences[0].trim().slice(0, 50);
+        }
 
         // Try to extract price (looking for numbers with rupee symbols or "rupees")
         const priceMatch = text.match(/(?:₹|rupees?|rs\.?)\s*(\d+(?:,\d+)*(?:\.\d+)?)/i) ||
@@ -127,12 +184,6 @@ export const VoiceProductDialog = ({ isOpen, onClose, onProductAdded }: VoicePro
             extractedInfo.stock = parseInt(stockMatch[1]);
         }
 
-        // Extract name (first few words or sentence)
-        const sentences = transcript.split(/[.!?]/);
-        if (sentences.length > 0) {
-            extractedInfo.name = sentences[0].trim().slice(0, 50);
-        }
-
         // Try to identify category
         const categories = ['clothing', 'jewelry', 'food', 'handicraft', 'home decor', 'electronics'];
         for (const cat of categories) {
@@ -143,10 +194,21 @@ export const VoiceProductDialog = ({ isOpen, onClose, onProductAdded }: VoicePro
         }
 
         setExtractedData(extractedInfo);
+
+        // Announce each field sequentially with delays
+        if (extractedInfo.serialNumber) {
+            await announceField('serialNumber', extractedInfo.serialNumber, 500);
+        }
+        await announceField('name', extractedInfo.name || 'Not specified', extractedInfo.serialNumber ? 0 : 500);
+        await announceField('price', extractedInfo.price || 0, 0);
+        await announceField('stock', extractedInfo.stock || 0, 0);
+        await announceField('category', extractedInfo.category || 'General', 0);
+        await announceField('description', 'Product details captured', 0);
+
         setStage("confirm");
         setIsProcessing(false);
 
-        speak(t.voiceConfirm || `I heard: ${extractedInfo.name} for ${extractedInfo.price} rupees. Should I add this product?`);
+        speak(t.voiceConfirm || `All fields filled. Should I add this product?`);
     };
 
     const handleConfirm = async () => {
@@ -207,6 +269,8 @@ export const VoiceProductDialog = ({ isOpen, onClose, onProductAdded }: VoicePro
         setStage("listening");
         setError("");
         setSuccess(false);
+        setCurrentField(null);
+        setFilledFields([]);
         onClose();
     };
 
@@ -257,8 +321,8 @@ export const VoiceProductDialog = ({ isOpen, onClose, onProductAdded }: VoicePro
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 className={`relative w-32 h-32 rounded-full flex items-center justify-center transition-all ${isListening
-                                        ? "bg-red-500 shadow-glow-saffron animate-pulse"
-                                        : "gradient-teal shadow-elevated"
+                                    ? "bg-red-500 shadow-glow-saffron animate-pulse"
+                                    : "gradient-teal shadow-elevated"
                                     }`}
                             >
                                 {isListening ? (
@@ -297,8 +361,27 @@ export const VoiceProductDialog = ({ isOpen, onClose, onProductAdded }: VoicePro
                             </motion.div>
                         )}
 
+                        {/* Processing Status */}
+                        {stage === "processing" && currentField && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="p-4 rounded-lg bg-accent/10 border-2 border-accent/50 flex items-center gap-3"
+                            >
+                                <Loader2 className="w-5 h-5 text-accent animate-spin" />
+                                <div>
+                                    <p className="text-sm font-medium text-foreground">
+                                        {selectedLanguage === 'hi' ? 'भर रहा हूं...' : 'Filling...'}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground capitalize">
+                                        {currentField}
+                                    </p>
+                                </div>
+                            </motion.div>
+                        )}
+
                         {/* Extracted Data Preview */}
-                        {stage === "confirm" && extractedData && (
+                        {(stage === "processing" || stage === "confirm") && extractedData && (
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -307,23 +390,170 @@ export const VoiceProductDialog = ({ isOpen, onClose, onProductAdded }: VoicePro
                                 <p className="text-sm font-medium text-foreground mb-3">
                                     {t.extractedInfo || "Extracted Information:"}
                                 </p>
-                                <div className="grid grid-cols-2 gap-3 text-sm">
-                                    <div>
-                                        <span className="text-muted-foreground">Name:</span>
-                                        <p className="font-medium text-foreground">{extractedData.name || "Not specified"}</p>
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">Price:</span>
+                                <div className="grid grid-cols-3 gap-3 text-sm">
+                                    {/* Serial Number Field */}
+                                    {extractedData.serialNumber && (
+                                        <motion.div
+                                            className={`p-3 rounded-lg transition-all ${currentField === 'serialNumber'
+                                                    ? 'bg-accent/20 border-2 border-accent shadow-glow-saffron'
+                                                    : filledFields.includes('serialNumber')
+                                                        ? 'bg-success/10 border border-success/30'
+                                                        : 'bg-muted/50 border border-border'
+                                                }`}
+                                            animate={currentField === 'serialNumber' ? { scale: [1, 1.02, 1] } : {}}
+                                            transition={{ duration: 0.5, repeat: currentField === 'serialNumber' ? Infinity : 0 }}
+                                        >
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-muted-foreground font-medium text-xs">Serial #:</span>
+                                                {filledFields.includes('serialNumber') && (
+                                                    <motion.div
+                                                        initial={{ scale: 0 }}
+                                                        animate={{ scale: 1 }}
+                                                        className="w-4 h-4 rounded-full bg-success flex items-center justify-center"
+                                                    >
+                                                        <Check className="w-3 h-3 text-white" />
+                                                    </motion.div>
+                                                )}
+                                            </div>
+                                            <p className="font-medium text-foreground break-words">
+                                                {extractedData.serialNumber}
+                                            </p>
+                                        </motion.div>
+                                    )}
+
+                                    {/* Name Field */}
+                                    <motion.div
+                                        className={`p-3 rounded-lg transition-all ${currentField === 'name'
+                                                ? 'bg-accent/20 border-2 border-accent shadow-glow-saffron'
+                                                : filledFields.includes('name')
+                                                    ? 'bg-success/10 border border-success/30'
+                                                    : 'bg-muted/50 border border-border'
+                                            } ${extractedData.serialNumber ? '' : 'col-span-1'}`}
+                                        animate={currentField === 'name' ? { scale: [1, 1.02, 1] } : {}}
+                                        transition={{ duration: 0.5, repeat: currentField === 'name' ? Infinity : 0 }}
+                                    >
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-muted-foreground font-medium text-xs">Name:</span>
+                                            {filledFields.includes('name') && (
+                                                <motion.div
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    className="w-4 h-4 rounded-full bg-success flex items-center justify-center"
+                                                >
+                                                    <Check className="w-3 h-3 text-white" />
+                                                </motion.div>
+                                            )}
+                                        </div>
+                                        <p className="font-medium text-foreground break-words">
+                                            {extractedData.name || "Not specified"}
+                                        </p>
+                                    </motion.div>
+
+                                    {/* Price Field */}
+                                    <motion.div
+                                        className={`p-3 rounded-lg transition-all ${currentField === 'price'
+                                                ? 'bg-accent/20 border-2 border-accent shadow-glow-saffron'
+                                                : filledFields.includes('price')
+                                                    ? 'bg-success/10 border border-success/30'
+                                                    : 'bg-muted/50 border border-border'
+                                            }`}
+                                        animate={currentField === 'price' ? { scale: [1, 1.02, 1] } : {}}
+                                        transition={{ duration: 0.5, repeat: currentField === 'price' ? Infinity : 0 }}
+                                    >
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-muted-foreground font-medium text-xs">Price:</span>
+                                            {filledFields.includes('price') && (
+                                                <motion.div
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    className="w-4 h-4 rounded-full bg-success flex items-center justify-center"
+                                                >
+                                                    <Check className="w-3 h-3 text-white" />
+                                                </motion.div>
+                                            )}
+                                        </div>
                                         <p className="font-medium text-foreground">₹{extractedData.price || 0}</p>
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">Stock:</span>
+                                    </motion.div>
+
+                                    {/* Stock Field */}
+                                    <motion.div
+                                        className={`p-3 rounded-lg transition-all ${currentField === 'stock'
+                                                ? 'bg-accent/20 border-2 border-accent shadow-glow-saffron'
+                                                : filledFields.includes('stock')
+                                                    ? 'bg-success/10 border border-success/30'
+                                                    : 'bg-muted/50 border border-border'
+                                            }`}
+                                        animate={currentField === 'stock' ? { scale: [1, 1.02, 1] } : {}}
+                                        transition={{ duration: 0.5, repeat: currentField === 'stock' ? Infinity : 0 }}
+                                    >
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-muted-foreground font-medium text-xs">Stock:</span>
+                                            {filledFields.includes('stock') && (
+                                                <motion.div
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    className="w-4 h-4 rounded-full bg-success flex items-center justify-center"
+                                                >
+                                                    <Check className="w-3 h-3 text-white" />
+                                                </motion.div>
+                                            )}
+                                        </div>
                                         <p className="font-medium text-foreground">{extractedData.stock || 0} units</p>
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">Category:</span>
+                                    </motion.div>
+
+                                    {/* Category Field */}
+                                    <motion.div
+                                        className={`p-3 rounded-lg transition-all ${currentField === 'category'
+                                                ? 'bg-accent/20 border-2 border-accent shadow-glow-saffron'
+                                                : filledFields.includes('category')
+                                                    ? 'bg-success/10 border border-success/30'
+                                                    : 'bg-muted/50 border border-border'
+                                            }`}
+                                        animate={currentField === 'category' ? { scale: [1, 1.02, 1] } : {}}
+                                        transition={{ duration: 0.5, repeat: currentField === 'category' ? Infinity : 0 }}
+                                    >
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-muted-foreground font-medium text-xs">Category:</span>
+                                            {filledFields.includes('category') && (
+                                                <motion.div
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    className="w-4 h-4 rounded-full bg-success flex items-center justify-center"
+                                                >
+                                                    <Check className="w-3 h-3 text-white" />
+                                                </motion.div>
+                                            )}
+                                        </div>
                                         <p className="font-medium text-foreground">{extractedData.category || "General"}</p>
-                                    </div>
+                                    </motion.div>
+
+                                    {/* Description Field */}
+                                    <motion.div
+                                        className={`p-3 rounded-lg transition-all col-span-3 ${currentField === 'description'
+                                                ? 'bg-accent/20 border-2 border-accent shadow-glow-saffron'
+                                                : filledFields.includes('description')
+                                                    ? 'bg-success/10 border border-success/30'
+                                                    : 'bg-muted/50 border border-border'
+                                            }`}
+                                        animate={currentField === 'description' ? { scale: [1, 1.02, 1] } : {}}
+                                        transition={{ duration: 0.5, repeat: currentField === 'description' ? Infinity : 0 }}
+                                    >
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-muted-foreground font-medium text-xs">Description:</span>
+                                            {filledFields.includes('description') && (
+                                                <motion.div
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    className="w-4 h-4 rounded-full bg-success flex items-center justify-center"
+                                                >
+                                                    <Check className="w-3 h-3 text-white" />
+                                                </motion.div>
+                                            )}
+                                        </div>
+                                        <p className="font-medium text-foreground text-xs break-words line-clamp-2">
+                                            {extractedData.description || "No description"}
+                                        </p>
+                                    </motion.div>
                                 </div>
                             </motion.div>
                         )}
